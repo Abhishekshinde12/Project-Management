@@ -23,13 +23,13 @@ class TaskPublic(TaskCreate):
 
 
 # Task Assignes Schemas
-class TaskAssignesBase(SQLModel):
+class TaskAssigneesBase(SQLModel):
     task_id: UUID 
     user_id: UUID 
 
-class TaskAssignesCreate(TaskAssignesBase):
+class TaskAssigneesCreate(TaskAssigneesBase):
     pass 
 
-class TaskAssignesPublic(TaskAssignesBase):
+class TaskAssigneesPublic(TaskAssigneesBase):
     id: UUID 
     assigned_at: datetime 
