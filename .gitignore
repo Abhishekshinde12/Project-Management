@@ -1,0 +1,88 @@
+# FRONTEND ------------------
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+
+# BACKEND ----------------------
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.whl
+
+# PyInstaller
+# See https://github.com
+# for current PyInstaller bootloader version info
+# when using PyInstaller one would usually ignore the build/ folder
+# and the generated exe/app files
+# if you want to use the build/ folder uncomment this line
+# build/
+*.exe
+*.win
+*.app
+*.cpython-*
+*.pyc.make
+# ... (rest of PyInstaller ignores)
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# FastAPI and Python-specific
+.mypy_cache/
+.pytest_cache/
+.vscode/
+.idea/
+*.sqlite3
+log.txt
+
+# Editors and OS
+.DS_Store
+.ipynb_checkpoints
+
+details.txt 
