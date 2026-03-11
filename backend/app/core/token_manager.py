@@ -19,7 +19,7 @@ class TokenManager:
         access_token = create_access_token(user_id)
         refresh_token = create_refresh_token(user_id)
         family_id = secrets.token_urlsafe(16)
-        jti = decode_token(refresh_token)["jti"]
+        jti = decode_token(refresh_token, "refresh")["jti"]
 
         self.session.add(RefreshToken(
             jti=jti,
@@ -34,7 +34,7 @@ class TokenManager:
 
 
     def rotate_refresh_token(self, old_refresh_token: str):
-        payload = decode_token(old_refresh_token)
+        payload = decode_token(old_refresh_token, "refresh")
 
         if payload.get("type") != "refresh":
             raise ValueError("Not a refresh token")
@@ -56,7 +56,7 @@ class TokenManager:
         # hence the new pair of tokens belong to same family as earlier token
         new_access = create_access_token(str(record.user_id))
         new_refresh = create_refresh_token(str(record.user_id))
-        new_jti = decode_token(new_refresh)["jti"]
+        new_jti = decode_token(new_refresh, "refresh")["jti"]
 
         self.session.add(RefreshToken(
             jti=new_jti,

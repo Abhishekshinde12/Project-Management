@@ -10,7 +10,7 @@ from app.config import settings
 
 
 router = APIRouter(prefix="/auth", tags=['Auth'])
-pwd_context = CryptContext(schemes=['bcrypt'])
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
 COOKIE_SETTINGS = {
@@ -21,23 +21,23 @@ COOKIE_SETTINGS = {
 
 
 # Dependency
-def get_current_user(
-    request: Request,
-    session: Session = Depends(get_session)
-) -> User:
-    token = request.cookies.get("access_token")
-    if not token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    try:
-        payload = decode_token(token)
-        if payload.get("type") != "access":
-            raise ValueError()
-        user = session.get(User, payload["sub"])
-        if not user:
-            raise ValueError()
-        return user
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Could not validate credentials")
+# def get_current_user(
+#     request: Request,
+#     session: Session = Depends(get_session)
+# ) -> User:
+#     token = request.cookies.get("access_token")
+#     if not token:
+#         raise HTTPException(status_code=401, detail="Not authenticated")
+#     try:
+#         payload = decode_token(token)
+#         if payload.get("type") != "access":
+#             raise ValueError()
+#         user = session.get(User, payload["sub"])
+#         if not user:
+#             raise ValueError()
+#         return user
+#     except ValueError:
+#         raise HTTPException(status_code=401, detail="Could not validate credentials")
     
 
 @router.post('/token')
@@ -47,7 +47,8 @@ def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
     session: Session = Depends(get_session)
 ):
-    user = session.exec(select(User)).where(User.email == form_data.username).first()
+    user = session.exec(select(User).where(User.email == form_data.username)).first()
+    print(user.model_dump())
     
     if not user or not pwd_context.verify(form_data.password, user.password):
         raise HTTPException(status_code=401, detail="Invalid credentials")
@@ -106,7 +107,7 @@ def logout(
     refresh_token = request.cookies.get("refresh_token")
     if refresh_token:
         try:
-            payload = decode_token(refresh_token)
+            payload = decode_token(refresh_token, "refresh")
             tm = TokenManager(session)
             tm._revoke_family(payload["jti"])
         except ValueError:

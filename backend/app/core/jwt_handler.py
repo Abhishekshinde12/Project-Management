@@ -21,7 +21,7 @@ def create_access_token(user_id: str) -> str:
         "type": "access",
         "jti": secrets.token_urlsafe(16)
     }
-    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(payload, settings.ACCESS_TOKEN_SECRET, algorithm=settings.ALGORITHM)
 
 
 def create_refresh_token(user_id: str) -> str:
@@ -32,11 +32,14 @@ def create_refresh_token(user_id: str) -> str:
         "type": "refresh",
         "jti": secrets.token_urlsafe(16)
     }
-    return jwt.encode(payload, settings.JWT_SECRET_KEY, algorithm=settings.ALGORITHM)
+    return jwt.encode(payload, settings.REFRESH_TOKEN_SECRET, algorithm=settings.ALGORITHM)
 
 
-def decode_token(token: str) -> Dict[str, Any]:
+# this by default works for access
+# but also used during refresh token rotation
+def decode_token(token: str, token_type: str = "access") -> Dict[str, Any]:
     try:
-        return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.ALGORITHM])
+        secret = settings.ACCESS_TOKEN_SECRET if token_type == "access" else settings.REFRESH_TOKEN_SECRET
+        return jwt.decode(token, secret, algorithms=[settings.ALGORITHM])
     except JWTError as e:
         raise ValueError(f"Invalid token: {e}")
