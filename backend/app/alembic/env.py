@@ -9,11 +9,7 @@ import sqlmodel
 from sqlmodel import SQLModel
 
 # Importing ALL models here so alembic can detect them
-from app.models.user import User
-from app.models.organization import Organization, OrganizationMember
-from app.models.project import Project
-from app.models.task import Task, TaskAssignees
-from app.models.comment import Comment 
+from app.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
