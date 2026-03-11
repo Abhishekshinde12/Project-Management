@@ -6,12 +6,13 @@ load_dotenv()
 
 class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv('DATABASE_URL')
+    ALEMBIC_DATABASE_URL: str = os.getenv('ALEMBIC_DATABASE_URL')
 
     ACCESS_TOKEN_SECRET: str = os.getenv('ACCESS_TOKEN_SECRET')
-    ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
+    ACCESS_TOKEN_EXPIRE_MINUTES: str = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
     REFRESH_TOKEN_SECRET: str = os.getenv('REFRESH_TOKEN_SECRET')
-    REFRESH_TOKEN_EXPIRE_DAYS = os.getenv('REFRESH_TOKEN_EXPIRE_DAYS')
-    ALGORITHM: str = os.get_env('ALGORITHM')
+    REFRESH_TOKEN_EXPIRE_DAYS: str = os.getenv('REFRESH_TOKEN_EXPIRE_DAYS')
+    ALGORITHM: str = os.getenv('ALGORITHM')
 
 '''
 - This will cache this function output
