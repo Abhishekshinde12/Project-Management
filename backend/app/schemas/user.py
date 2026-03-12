@@ -7,7 +7,6 @@ from datetime import datetime
 class UserBase(SQLModel):
     name: str 
     email: str 
-    user_type: UserType = UserType.MEMBER
 
 
 class UserCreate(UserBase):

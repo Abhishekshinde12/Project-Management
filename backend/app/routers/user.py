@@ -7,7 +7,7 @@ from sqlmodel import Session, select
 from uuid import UUID 
 from passlib.context import CryptContext
 
-router = APIRouter(prefix="/user", tags=['user'])
+router = APIRouter(prefix="/user", tags=['User'])
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 
@@ -19,11 +19,11 @@ def get_user(
 ):
     user = session.get(User, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="user not found")
+        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-@router.post('/create', response_model=UserPublic)
+@router.post('/', response_model=UserPublic)
 def create_user(
     data: UserCreate,
     session: Session = Depends(get_session)
@@ -46,7 +46,7 @@ def create_user(
     return user
 
 
-@router.delete('/delete', status_code=204)
+@router.delete('/{user_id}', status_code=204)
 def delete_user(
     user_id: UUID,
     session: Session = Depends(get_session),

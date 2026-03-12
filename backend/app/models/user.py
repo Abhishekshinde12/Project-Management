@@ -23,7 +23,6 @@ class User(SQLModel, table=True):
     name: str 
     email: EmailStr = Field(index=True, unique=True)
     password: str
-    user_type: UserType = Field(default=UserType.MEMBER)
     created_at: datetime = Field(default_factory= lambda: datetime.now(timezone.utc))
 
     # Orgs this user owns
