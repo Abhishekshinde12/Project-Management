@@ -4,7 +4,6 @@ from uuid import UUID
 
 
 class CommentBase(SQLModel):
-    task_id: UUID 
     text: str 
     # commented_user_id: UUID, even this value taken from auth token
 
@@ -15,4 +14,5 @@ class CommentCreate(CommentBase):
 
 class CommentPublic(CommentBase):
     id: UUID 
+    task_id: UUID 
     created_at: datetime 

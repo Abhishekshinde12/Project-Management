@@ -12,8 +12,8 @@ class TaskBase(SQLModel):
 
 class TaskCreate(TaskBase):
     due_date: datetime 
-    priority_id: TaskPriority
-    status_id: TaskStatus
+    priority: TaskPriority
+    status: TaskStatus
     # created_by: UUID, injected from auth token
 
 class TaskPublic(TaskCreate):

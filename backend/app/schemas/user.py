@@ -16,3 +16,9 @@ class UserCreate(UserBase):
 class UserPublic(UserBase):
     id: UUID 
     created_at: datetime
+
+
+class UserUpdate(SQLModel):
+    name: str | None = None
+    email: str | None = None
+    password: str | None = None

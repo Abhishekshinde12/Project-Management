@@ -6,7 +6,6 @@ from app.enums import UserType
 
 # Organization Schemas
 class OrganizationBase(SQLModel):
-    owner_id: UUID 
     name: str 
 
 class OrganizationCreate(OrganizationBase):
@@ -14,7 +13,11 @@ class OrganizationCreate(OrganizationBase):
 
 class OrganizationPublic(OrganizationBase):
     id: UUID 
+    owner_id: UUID 
     created_at: datetime
+
+class OrganizationUpdate(SQLModel):
+    name: str | None = None
 
 
 # Organization Members Schemas

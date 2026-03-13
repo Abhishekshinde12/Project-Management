@@ -16,7 +16,7 @@ class Task(SQLModel, table=True):
     description: Optional[str] = None 
     due_date: Optional[datetime] = None
     priority: TaskPriority = Field(default=TaskPriority.LOW)
-    status_id: TaskStatus = Field(default=TaskStatus.TODO)
+    status: TaskStatus = Field(default=TaskStatus.TODO)
     created_by: UUID = Field(foreign_key='user.id', nullable=False)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
