@@ -1,68 +1,134 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Syne", sans-serif;
+  --font-body: "DM Sans", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  --color-ink-50:  #f0f0f5;
+  --color-ink-100: #e0e0eb;
+  --color-ink-200: #c2c2d6;
+  --color-ink-300: #9f9fbe;
+  --color-ink-400: #7b7ba5;
+  --color-ink-500: #5f5f8e;
+  --color-ink-600: #4a4a73;
+  --color-ink-700: #363659;
+  --color-ink-800: #22223f;
+  --color-ink-900: #0f0f1e;
+  --color-ink-950: #07070f;
+
+  --color-volt-50:  #f5ffe0;
+  --color-volt-100: #eaffc0;
+  --color-volt-200: #d5ff85;
+  --color-volt-300: #c2ff4d;
+  --color-volt-400: #b0ff1a;
+  --color-volt-500: #99f500;
+  --color-volt-600: #78c200;
+  --color-volt-700: #5a9200;
+  --color-volt-800: #3c6100;
+  --color-volt-900: #1e3100;
+
+  --color-coral-400: #ff6b6b;
+  --color-coral-500: #ff4757;
+
+  --color-azure-400: #74b9ff;
+  --color-azure-500: #0984e3;
+
+  --color-amber-400: #fdcb6e;
+  --color-amber-500: #e17055;
+
+  --animate-fade-up:    fadeUp 0.4s ease forwards;
+  --animate-fade-in:    fadeIn 0.3s ease forwards;
+  --animate-slide-in:   slideIn 0.3s ease forwards;
+  --animate-pulse-soft: pulseSoft 2s ease-in-out infinite;
+}
+
+@keyframes fadeUp {
+  0%   { opacity: 0; transform: translateY(16px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes slideIn {
+  0%   { opacity: 0; transform: translateX(-16px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulseSoft {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.6; }
+}
+
+/* ── CSS variables (used in component styles below) ── */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --bg-base:       #07070f;
+  --bg-surface:    #0f0f1e;
+  --bg-elevated:   #15152a;
+  --bg-overlay:    #1c1c35;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-default:rgba(255,255,255,0.10);
+  --border-strong: rgba(255,255,255,0.18);
+  --text-primary:  #f0f0f5;
+  --text-secondary:#9f9fbe;
+  --text-muted:    #5f5f8e;
+  --accent:        #b0ff1a;
+  --accent-dim:    rgba(176,255,26,0.12);
+  --accent-glow:   rgba(176,255,26,0.25);
+}
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+* { box-sizing: border-box; }
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
+html {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: "DM Sans", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
+  background-color: var(--bg-base);
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+/* ── Utility classes not in Tailwind core ── */
+.glass {
+  background: rgba(255,255,255,0.03);
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-subtle);
 }
-button:hover {
-  border-color: #646cff;
+.glass-elevated {
+  background: rgba(255,255,255,0.05);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-default);
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.surface {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
 }
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.surface-elevated {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-default);
+}
+.text-gradient {
+  background: linear-gradient(135deg, #f0f0f5 0%, #9f9fbe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.volt-glow {
+  box-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(176,255,26,0.08);
 }
