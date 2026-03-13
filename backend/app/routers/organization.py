@@ -14,6 +14,19 @@ from app.enums import UserType
 
 router = APIRouter(prefix="/org", tags=['organization'])
 
+@router.get("/", response_model=list[OrganizationPublic])
+def get_all_org(
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_user)
+):
+    orgs = session.exec(select(Organization).where(
+        Organization.owner_id == current_user.id
+    ))
+    if not orgs:
+        raise HTTPException(status_code=404, detail="Organization not found")
+    return orgs
+
+
 @router.get("/{org_id}", response_model=OrganizationPublic)
 def get_org(
     org_id: UUID,

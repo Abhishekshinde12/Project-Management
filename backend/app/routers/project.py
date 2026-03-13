@@ -12,7 +12,7 @@ from app.enums import UserType, ProjectStatus
 router = APIRouter(prefix='/project', tags=['project'])
 
 
-@router.get('/all/{org_id}', response_model=ProjectPublic)
+@router.get('/all/{org_id}', response_model=list[ProjectPublic])
 def get_all_projects(
     org_id: UUID,
     session: Session = Depends(get_session),
