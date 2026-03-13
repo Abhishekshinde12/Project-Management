@@ -124,7 +124,7 @@ function OrgSettings() {
                 >
                   {/* Avatar */}
                   <div className={cn(
-                    'w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 font-display font-bold text-sm',
+                    'w-9 h-9 rounded-lg flex items-center justify-center shrink-0 font-display font-bold text-sm',
                     isActive ? 'bg-volt-400/20 text-volt-400' : 'bg-ink-800 text-ink-400'
                   )}>
                     {org.name?.charAt(0).toUpperCase()}
@@ -166,7 +166,7 @@ function OrgSettings() {
 
                   {/* Actions */}
                   {!isEditing && (
-                    <div className="flex items-center gap-1 flex-shrink-0">
+                    <div className="flex items-center gap-1 shrink-0">
                       {!isActive && (
                         <Button
                           size="sm"

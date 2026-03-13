@@ -86,7 +86,7 @@ export default function MembersPage() {
                     <p className="text-xs text-ink-600 mt-0.5">Joined {formatDate(member.joined_at)}</p>
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-2 shrink-0">
                     <Badge className={cn('gap-1', roleCfg.color, roleCfg.bg)}>
                       <RoleIcon size={10} />
                       {roleCfg.label}

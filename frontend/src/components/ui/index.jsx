@@ -51,7 +51,7 @@ import { getInitials, getAvatarColor } from '@/utils/helpers'
 export function Avatar({ name, size = 'md', className }) {
   const sizes = { sm: 'w-6 h-6 text-xs', md: 'w-8 h-8 text-xs', lg: 'w-10 h-10 text-sm', xl: 'w-12 h-12 text-base' }
   return (
-    <div className={cn('rounded-full flex items-center justify-center font-display font-semibold flex-shrink-0', sizes[size], getAvatarColor(name), className)}>
+    <div className={cn('rounded-full flex items-center justify-center font-display font-semibold shrink-0', sizes[size], getAvatarColor(name), className)}>
       {getInitials(name)}
     </div>
   )

@@ -39,12 +39,12 @@ export default function Sidebar() {
     <motion.aside
       animate={{ width: sidebarCollapsed ? 64 : 220 }}
       transition={{ duration: 0.2, ease: 'easeInOut' }}
-      className="flex-shrink-0 h-screen bg-ink-950 border-r border-ink-800 flex flex-col overflow-hidden z-20"
+      className="shrink-0 h-screen bg-ink-950 border-r border-ink-800 flex flex-col overflow-hidden z-20"
     >
       {/* Logo */}
-      <div className="h-14 flex items-center px-4 border-b border-ink-800 flex-shrink-0">
+      <div className="h-14 flex items-center px-4 border-b border-ink-800 shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-volt-400 flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-volt-400 flex items-center justify-center shrink-0">
             <span className="font-display font-black text-ink-950 text-xs leading-none">P</span>
           </div>
           <AnimatePresence>
@@ -86,7 +86,7 @@ export default function Sidebar() {
                     className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-volt-400 rounded-full"
                   />
                 )}
-                <Icon size={16} className="flex-shrink-0" />
+                <Icon size={16} className="shrink-0" />
                 <AnimatePresence>
                   {!sidebarCollapsed && (
                     <motion.span
@@ -106,7 +106,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Bottom */}
-      <div className="border-t border-ink-800 p-2 space-y-1 flex-shrink-0">
+      <div className="border-t border-ink-800 p-2 space-y-1 shrink-0">
         <button
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="w-full flex items-center gap-3 px-2.5 py-2 rounded-lg text-ink-500 hover:bg-ink-800 hover:text-ink-200 transition-colors text-sm"
@@ -125,7 +125,7 @@ export default function Sidebar() {
 
         {user && (
           <div className="flex items-center gap-2.5 px-2 py-2 rounded-lg">
-            <Avatar name={user.name || user.email || 'U'} size="sm" className="flex-shrink-0" />
+            <Avatar name={user.name || user.email || 'U'} size="sm" className="shrink-0" />
             <AnimatePresence>
               {!sidebarCollapsed && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex-1 min-w-0">
@@ -141,7 +141,7 @@ export default function Sidebar() {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   onClick={handleLogout}
-                  className="p-1.5 rounded-lg hover:bg-ink-700 text-ink-600 hover:text-coral-400 transition-colors flex-shrink-0"
+                  className="p-1.5 rounded-lg hover:bg-ink-700 text-ink-600 hover:text-coral-400 transition-colors shrink-0"
                   title="Logout"
                 >
                   <LogOut size={13} />

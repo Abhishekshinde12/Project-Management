@@ -120,7 +120,7 @@ function ProjectCard({ project, onDelete }) {
     >
       <Card hover className="group relative h-full flex flex-col" onClick={() => navigate(`/projects/${project.id}`)}>
         <div className="flex items-start justify-between mb-3">
-          <div className="w-9 h-9 rounded-lg bg-volt-400/10 flex items-center justify-center flex-shrink-0">
+          <div className="w-9 h-9 rounded-lg bg-volt-400/10 flex items-center justify-center shrink-0">
             <span className="font-display font-bold text-volt-400 text-base">{project.name?.charAt(0)}</span>
           </div>
           <div className="flex items-center gap-2">

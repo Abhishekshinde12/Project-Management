@@ -1,9 +1,6 @@
 import axios from 'axios'
 import { useAuthStore } from '@/store/authStore'
 
-// Empty baseURL = requests go to the same origin (localhost:5173)
-// Vite's dev proxy then forwards them to localhost:8000.
-// This avoids CORS entirely since the browser sees same-origin requests.
 export const api = axios.create({
   baseURL: '/api',
   withCredentials: true,
@@ -41,7 +38,12 @@ api.interceptors.response.use(
       isRefreshing = true
 
       try {
-        await api.post('/auth/refresh')
+        // Call /auth/refresh directly (NOT /api/auth/refresh).
+        // The refresh_token cookie has path="/auth/refresh" on the backend,
+        // so the browser only sends it when the request URL is exactly /auth/refresh.
+        // The dedicated Vite proxy rule for /auth/refresh forwards this to FastAPI
+        // without any path rewriting.
+        await axios.post('/auth/refresh', {}, { withCredentials: true })
         processQueue(null)
         return api(original)
       } catch (refreshError) {

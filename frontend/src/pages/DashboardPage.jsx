@@ -67,7 +67,7 @@ export default function DashboardPage() {
             {stats.map((s) => (
               <motion.div key={s.label} variants={stagger.item}>
                 <Card className="flex items-center gap-3">
-                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${s.bg}`}>
+                  <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${s.bg}`}>
                     <s.icon size={16} className={s.color} />
                   </div>
                   <div>
@@ -110,7 +110,7 @@ export default function DashboardPage() {
                       className="flex items-center justify-between p-2.5 rounded-lg hover:bg-ink-800 transition-colors group"
                     >
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded-lg bg-volt-400/10 flex items-center justify-center flex-shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-volt-400/10 flex items-center justify-center shrink-0">
                           <span className="text-xs font-display font-bold text-volt-400">
                             {proj.name?.charAt(0).toUpperCase()}
                           </span>
@@ -120,7 +120,7 @@ export default function DashboardPage() {
                           <p className="text-xs text-ink-600 truncate">{proj.description}</p>
                         </div>
                       </div>
-                      <ArrowRight size={12} className="text-ink-700 group-hover:text-ink-400 transition-colors flex-shrink-0" />
+                      <ArrowRight size={12} className="text-ink-700 group-hover:text-ink-400 transition-colors shrink-0" />
                     </Link>
                   ))}
                 </div>

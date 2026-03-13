@@ -183,7 +183,7 @@ function KanbanColumn({ status, tasks, onTaskClick, projectId, onTasksChanged })
   const [showCreate, setShowCreate] = useState(false)
 
   return (
-    <div className="flex-shrink-0 w-72 flex flex-col gap-2">
+    <div className="shrink-0 w-72 flex flex-col gap-2">
       {/* Column header */}
       <div className="flex items-center gap-2 px-1 py-1">
         <span className={`text-sm ${cfg.color}`}>{cfg.icon}</span>
@@ -545,7 +545,7 @@ function TaskDetailModal({ task, onClose }) {
 function CommentItem({ comment, taskId, onDelete }) {
   return (
     <div className="flex gap-2.5 group">
-      <Avatar name="U" size="sm" className="flex-shrink-0 mt-0.5" />
+      <Avatar name="U" size="sm" className="shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1">
           <span className="text-xs font-medium text-ink-300">User</span>
