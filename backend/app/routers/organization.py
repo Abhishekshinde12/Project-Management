@@ -7,7 +7,8 @@ from app.schemas.organization import (
 from app.db.postgres_db import get_session
 from app.core.security import get_current_user
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select 
+from sqlmodel import Session, select
+from sqlalchemy.orm import selectinload 
 from uuid import UUID 
 from app.enums import UserType
 
@@ -130,7 +131,12 @@ def get_members(
     current_user: User = Depends(get_current_user)
 ):
     org, _ = get_org_and_verify_membership(org_id, session, current_user)
-    return org.memberships
+    members = session.exec(
+        select(OrganizationMember)
+        .where(OrganizationMember.org_id == org_id)
+        .options(selectinload(OrganizationMember.user))
+    ).all()
+    return members
 
 
 @router.get('/{org_id}/members/{member_id}', response_model=OrganizationMemberPublic)
@@ -147,6 +153,7 @@ def get_member(
             OrganizationMember.org_id == org_id,
             OrganizationMember.id == member_id
         )
+        .options(selectinload(OrganizationMember.user))
     ).first()
     if not member:
         raise HTTPException(status_code=404, detail="Member not found")

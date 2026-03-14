@@ -21,6 +21,12 @@ class OrganizationUpdate(SQLModel):
 
 
 # Organization Members Schemas
+class UserSummary(SQLModel):
+    id: UUID
+    name: str
+    email: str
+
+
 class OrganizationMemberBase(SQLModel):
     org_id: UUID 
     user_id: UUID 
@@ -33,4 +39,5 @@ class OrganizationMemberCreate(OrganizationMemberBase):
 
 class OrganizationMemberPublic(OrganizationMemberBase):
     id: UUID 
+    user: UserSummary
     joined_at: datetime 

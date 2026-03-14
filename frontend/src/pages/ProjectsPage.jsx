@@ -1,20 +1,20 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Link, useParams, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
-  FolderKanban, Plus, MoreHorizontal, Archive, Trash2,
-  ArrowLeft, Calendar, Edit2, CheckSquare
+  FolderKanban, Plus, MoreHorizontal, Trash2,
+  ArrowLeft, Calendar, Edit2, CheckSquare, Archive, RotateCcw
 } from 'lucide-react'
 import { projectApi } from '@/api/services'
 import { useAuthStore } from '@/store/authStore'
+import { taskStore } from '@/store/taskStore'
 import {
   Card, Button, Modal, Input, Textarea, Select,
   Badge, EmptyState, Spinner, DropdownMenu
 } from '@/components/ui'
 import PageHeader from '@/components/layout/PageHeader'
-import { formatDate, getProjectStatusConfig, extractError } from '@/utils/helpers'
-import { cn } from '@/utils/helpers'
+import { formatDate, getProjectStatusConfig, extractError, cn } from '@/utils/helpers'
 import toast from 'react-hot-toast'
 
 // ── Projects List ─────────────────────────────────────
@@ -22,6 +22,7 @@ export default function ProjectsPage() {
   const { currentOrgId } = useAuthStore()
   const qc = useQueryClient()
   const [showCreate, setShowCreate] = useState(false)
+  const [editProject, setEditProject] = useState(null)
 
   const { data, isLoading } = useQuery({
     queryKey: ['projects', currentOrgId],
@@ -73,21 +74,23 @@ export default function ProjectsPage() {
       ) : (
         <motion.div
           className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
-          initial="hidden"
-          animate="visible"
+          initial="hidden" animate="visible"
           variants={{ visible: { transition: { staggerChildren: 0.06 } } }}
         >
           {projects.map((proj) => (
             <ProjectCard
               key={proj.id}
               project={proj}
-              onDelete={() => deleteMutation.mutate(proj.id)}
+              onEdit={() => setEditProject(proj)}
+              onDelete={() => {
+                if (confirm(`Delete "${proj.name}"? This cannot be undone.`)) deleteMutation.mutate(proj.id)
+              }}
             />
           ))}
           <motion.div
             variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
             onClick={() => setShowCreate(true)}
-            className="rounded-xl border border-dashed border-ink-700 hover:border-volt-400/40 hover:bg-volt-400/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 min-h-[140px] group"
+            className="rounded-xl border border-dashed border-ink-700 hover:border-volt-400/40 hover:bg-volt-400/5 transition-all cursor-pointer flex flex-col items-center justify-center gap-2 min-h-40 group"
           >
             <Plus size={18} className="text-ink-600 group-hover:text-volt-400 transition-colors" />
             <span className="text-sm text-ink-600 group-hover:text-volt-400 transition-colors font-medium">New project</span>
@@ -95,30 +98,44 @@ export default function ProjectsPage() {
         </motion.div>
       )}
 
-      <CreateProjectModal
-        open={showCreate}
-        onClose={() => setShowCreate(false)}
-        orgId={currentOrgId}
-      />
+      <CreateProjectModal open={showCreate} onClose={() => setShowCreate(false)} orgId={currentOrgId} />
+      <EditProjectModal project={editProject} onClose={() => setEditProject(null)} />
     </div>
   )
 }
 
-function ProjectCard({ project, onDelete }) {
+function ProjectCard({ project, onEdit, onDelete }) {
   const statusCfg = getProjectStatusConfig(project.status)
-  const navigate = useNavigate()
+  const navigate  = useNavigate()
+  const taskCount = taskStore.getIds(project.id).length
+  const qc        = useQueryClient()
+
+  const archiveMutation = useMutation({
+    mutationFn: () => projectApi.update(project.id, {
+      name: project.name,
+      description: project.description,
+      status: project.status === 'active' ? 'archived' : 'active',
+    }),
+    onSuccess: () => { qc.invalidateQueries(['projects']); toast.success(`Project ${project.status === 'active' ? 'archived' : 'restored'}`) },
+    onError: (e) => toast.error(extractError(e)),
+  })
 
   const menuItems = [
-    { icon: Edit2, label: 'Edit', onClick: () => navigate(`/projects/${project.id}/edit`) },
+    { icon: Edit2,    label: 'Edit',    onClick: (e) => { e?.stopPropagation(); onEdit() } },
+    { icon: project.status === 'active' ? Archive : RotateCcw,
+      label: project.status === 'active' ? 'Archive' : 'Restore',
+      onClick: (e) => { e?.stopPropagation(); archiveMutation.mutate() } },
     { separator: true },
-    { icon: Trash2, label: 'Delete', danger: true, onClick: onDelete },
+    { icon: Trash2, label: 'Delete', danger: true, onClick: (e) => { e?.stopPropagation(); onDelete() } },
   ]
 
   return (
-    <motion.div
-      variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
-    >
-      <Card hover className="group relative h-full flex flex-col" onClick={() => navigate(`/projects/${project.id}`)}>
+    <motion.div variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}>
+      <Card
+        hover
+        className="group relative h-full flex flex-col"
+        onClick={() => navigate(`/projects/${project.id}`)}
+      >
         <div className="flex items-start justify-between mb-3">
           <div className="w-9 h-9 rounded-lg bg-volt-400/10 flex items-center justify-center shrink-0">
             <span className="font-display font-bold text-volt-400 text-base">{project.name?.charAt(0)}</span>
@@ -141,18 +158,25 @@ function ProjectCard({ project, onDelete }) {
         <h3 className="font-display font-semibold text-ink-100 text-sm mb-1 line-clamp-1">{project.name}</h3>
         <p className="text-xs text-ink-500 line-clamp-2 flex-1">{project.description}</p>
 
-        <div className="mt-3 pt-3 border-t border-ink-800 flex items-center gap-1.5 text-xs text-ink-600">
-          <Calendar size={11} />
-          <span>{formatDate(project.created_at)}</span>
+        <div className="mt-3 pt-3 border-t border-ink-800 flex items-center justify-between text-xs text-ink-600">
+          <div className="flex items-center gap-1.5">
+            <Calendar size={11} />
+            <span>{formatDate(project.created_at)}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <CheckSquare size={11} />
+            <span>{taskCount} task{taskCount !== 1 ? 's' : ''}</span>
+          </div>
         </div>
       </Card>
     </motion.div>
   )
 }
 
+// ── Create Project Modal ──────────────────────────────
 function CreateProjectModal({ open, onClose, orgId }) {
   const qc = useQueryClient()
-  const [form, setForm] = useState({ name: '', description: '' })
+  const [form, setForm]   = useState({ name: '', description: '' })
   const [errors, setErrors] = useState({})
 
   const mutation = useMutation({
@@ -161,6 +185,7 @@ function CreateProjectModal({ open, onClose, orgId }) {
       qc.invalidateQueries(['projects'])
       toast.success('Project created! 🎉')
       setForm({ name: '', description: '' })
+      setErrors({})
       onClose()
     },
     onError: (e) => toast.error(extractError(e)),
@@ -171,8 +196,8 @@ function CreateProjectModal({ open, onClose, orgId }) {
   const handleSubmit = (e) => {
     e.preventDefault()
     const errs = {}
-    if (!form.name) errs.name = 'Name is required'
-    if (!form.description) errs.description = 'Description is required'
+    if (!form.name.trim())        errs.name        = 'Name is required'
+    if (!form.description.trim()) errs.description = 'Description is required'
     if (Object.keys(errs).length) return setErrors(errs)
     mutation.mutate({ ...form, org_id: orgId })
   }
@@ -182,9 +207,72 @@ function CreateProjectModal({ open, onClose, orgId }) {
       <form onSubmit={handleSubmit} className="space-y-4">
         <Input label="Project Name" placeholder="e.g. Marketing Website" value={form.name} onChange={set('name')} error={errors.name} autoFocus />
         <Textarea label="Description" placeholder="What's this project about?" value={form.description} onChange={set('description')} error={errors.description} rows={3} />
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="flex justify-end gap-2 pt-1">
           <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
           <Button type="submit" loading={mutation.isPending}>Create project</Button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+// ── Edit Project Modal ────────────────────────────────
+function EditProjectModal({ project, onClose }) {
+  const qc = useQueryClient()
+  const [form, setForm]   = useState({ name: '', description: '', status: 'active' })
+  const [errors, setErrors] = useState({})
+
+  // Populate form when project changes
+  useState(() => {
+    if (project) setForm({ name: project.name || '', description: project.description || '', status: project.status || 'active' })
+  }, [project])
+
+  // useEffect equivalent for modal open
+  if (project && form.name === '' && project.name) {
+    setForm({ name: project.name, description: project.description || '', status: project.status || 'active' })
+  }
+
+  const mutation = useMutation({
+    mutationFn: (data) => projectApi.update(project.id, data),
+    onSuccess: () => {
+      qc.invalidateQueries(['projects'])
+      qc.invalidateQueries(['project', project.id])
+      toast.success('Project updated!')
+      onClose()
+    },
+    onError: (e) => toast.error(extractError(e)),
+  })
+
+  const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }))
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    const errs = {}
+    if (!form.name.trim())        errs.name        = 'Name is required'
+    if (!form.description.trim()) errs.description = 'Description is required'
+    if (Object.keys(errs).length) return setErrors(errs)
+    mutation.mutate(form)
+  }
+
+  if (!project) return null
+
+  return (
+    <Modal open={!!project} onClose={onClose} title="Edit Project">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <Input label="Project Name" placeholder="e.g. Marketing Website" value={form.name} onChange={set('name')} error={errors.name} autoFocus />
+        <Textarea label="Description" placeholder="What's this project about?" value={form.description} onChange={set('description')} error={errors.description} rows={3} />
+        <Select
+          label="Status"
+          value={form.status}
+          onChange={set('status')}
+          options={[
+            { value: 'active',   label: 'Active'   },
+            { value: 'archived', label: 'Archived' },
+          ]}
+        />
+        <div className="flex justify-end gap-2 pt-1">
+          <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+          <Button type="submit" loading={mutation.isPending}>Save changes</Button>
         </div>
       </form>
     </Modal>
@@ -194,9 +282,8 @@ function CreateProjectModal({ open, onClose, orgId }) {
 // ── Project Detail ────────────────────────────────────
 export function ProjectDetailPage() {
   const { projectId } = useParams()
-  const navigate = useNavigate()
-  const qc = useQueryClient()
-  const [showCreateTask, setShowCreateTask] = useState(false)
+  const navigate      = useNavigate()
+  const [showEdit, setShowEdit] = useState(false)
 
   const { data: project, isLoading } = useQuery({
     queryKey: ['project', projectId],
@@ -204,7 +291,7 @@ export function ProjectDetailPage() {
   })
 
   if (isLoading) return <div className="flex justify-center pt-20"><Spinner size={24} /></div>
-  if (!project) return <div className="p-6 text-ink-500">Project not found</div>
+  if (!project)  return <div className="p-6 text-ink-500">Project not found</div>
 
   const statusCfg = getProjectStatusConfig(project.status)
 
@@ -231,24 +318,20 @@ export function ProjectDetailPage() {
           </div>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => navigate(`/projects/${projectId}/edit`)}>
-            <Edit2 size={13} /> Edit
+          <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
+            <Edit2 size={13} /> Edit project
           </Button>
-          <Button size="sm" onClick={() => setShowCreateTask(true)}>
-            <Plus size={13} /> Add task
+          <Button size="sm" onClick={() => navigate('/tasks')}>
+            <CheckSquare size={13} /> View tasks
           </Button>
         </div>
       </div>
 
-      <div className="surface rounded-xl p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <CheckSquare size={14} className="text-ink-500" />
-          <h2 className="font-display font-semibold text-sm text-ink-300">Tasks</h2>
-        </div>
-        <p className="text-sm text-ink-600">
-          Navigate to <Link to="/tasks" className="text-volt-400 hover:underline">Tasks</Link> to manage tasks for this project.
-        </p>
+      <div className="surface rounded-xl p-4 text-sm text-ink-500">
+        Created {formatDate(project.created_at)} · {taskStore.getIds(project.id).length} tasks
       </div>
+
+      <EditProjectModal project={showEdit ? project : null} onClose={() => setShowEdit(false)} />
     </div>
   )
 }

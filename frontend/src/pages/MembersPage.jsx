@@ -68,7 +68,7 @@ export default function MembersPage() {
           {members.map((member) => {
             const roleCfg = getRoleConfig(member.role)
             const RoleIcon = roleIcons[member.role] || User
-            const isMe = member.user_id === user?.id
+            const isMe = member.user?.id === user?.id
 
             return (
               <motion.div
@@ -76,11 +76,18 @@ export default function MembersPage() {
                 variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}
               >
                 <Card className="flex items-center gap-4 group">
-                  <Avatar name={member.user_id.slice(0, 6)} size="md" />
+                  {/* <Avatar name={member.user_id.slice(0, 6)} size="md" /> */}
+                  <Avatar name={member.user?.name} size="md" />
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-ink-200 truncate font-mono text-xs">{member.user_id.slice(0, 8)}...</p>
+                      {/* <p className="text-sm font-medium text-ink-200 truncate font-mono">{member.user_id.slice(0, 8)}...</p> */}
+                      <p className="text-sm font-medium text-ink-200 truncate">
+  {member.user?.name}
+</p>
+<p className="text-xs text-ink-500 truncate">
+  {member.user?.email}
+</p>
                       {isMe && <Badge className="text-volt-400 bg-volt-400/10 text-[10px]">You</Badge>}
                     </div>
                     <p className="text-xs text-ink-600 mt-0.5">Joined {formatDate(member.joined_at)}</p>
