@@ -32,7 +32,7 @@ export const orgApi = {
   delete:       (id)              => api.delete(`/org/${id}`),
   // Members
   getMembers:   (orgId)           => api.get(`/org/${orgId}/members`),
-  addMember:    (orgId, userId)   => api.post(`/org/${orgId}/members?user_id=${userId}`),
+  addMember:    (orgId, userId, role)   => api.post(`/org/${orgId}/members?user_id=${userId}&role=${role}`),
   removeMember: (orgId, memberId) => api.delete(`/org/${orgId}/members/${memberId}`),
 }
 

@@ -156,7 +156,8 @@ def get_member(
 @router.post('/{org_id}/members', response_model=OrganizationMemberPublic, status_code=201)
 def add_member(
     org_id: UUID,
-    user_id: UUID,  # ID of user to add
+    user_id: UUID,  # ID of user to add,
+    role: UserType,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
@@ -181,7 +182,7 @@ def add_member(
     if existing:
         raise HTTPException(status_code=400, detail="User is already a member")
     
-    member = OrganizationMember(org_id=org_id, user_id=user_id, role=UserType.MEMBER)
+    member = OrganizationMember(org_id=org_id, user_id=user_id, role=role)
     print("Added member type: ", member.model_dump())
     session.add(member)
     session.commit()

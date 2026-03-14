@@ -120,10 +120,11 @@ export default function MembersPage() {
 function AddMemberModal({ open, onClose, orgId }) {
   const qc = useQueryClient()
   const [userId, setUserId] = useState('')
+  const [role, setRole] = useState('member')
   const [error, setError] = useState('')
 
   const mutation = useMutation({
-    mutationFn: () => orgApi.addMember(orgId, userId),
+    mutationFn: () => orgApi.addMember(orgId, userId, role),
     onSuccess: () => {
       qc.invalidateQueries(['members'])
       toast.success('Member added!')
@@ -151,6 +152,20 @@ function AddMemberModal({ open, onClose, orgId }) {
           error={error}
           autoFocus
         />
+        <div className="flex flex-col gap-1.5">
+  <label className="text-xs font-medium text-ink-400 uppercase tracking-wider">
+    Role
+  </label>
+
+  <select
+    value={role}
+    onChange={(e) => setRole(e.target.value)}
+    className="w-full h-10 px-3 rounded-lg bg-ink-900 border border-ink-700 text-sm text-ink-100 focus:outline-none focus:border-volt-400/50 focus:bg-ink-800"
+  >
+    <option value="member">Member</option>
+    <option value="admin">Admin</option>
+  </select>
+</div>
         <p className="text-xs text-ink-600">
           Ask your team member to share their User ID from their profile settings.
         </p>
