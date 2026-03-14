@@ -6,7 +6,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     DATABASE_URL: str = os.getenv('DATABASE_URL')
-    ALEMBIC_DATABASE_URL: str = os.getenv('ALEMBIC_DATABASE_URL')
+    # ALEMBIC_DATABASE_URL: str = os.getenv('ALEMBIC_DATABASE_URL')
 
     ACCESS_TOKEN_SECRET: str = os.getenv('ACCESS_TOKEN_SECRET')
     ACCESS_TOKEN_EXPIRE_MINUTES: int = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')

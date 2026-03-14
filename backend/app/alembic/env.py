@@ -17,7 +17,7 @@ config = context.config
 
 
 # Overriding sqlalchemy.url at runtime 
-config.set_main_option("sqlalchemy.url", settings.ALEMBIC_DATABASE_URL)
+config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
 
 # Interpret the config file for Python logging.
