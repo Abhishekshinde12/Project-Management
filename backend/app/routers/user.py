@@ -23,6 +23,13 @@ def get_user(
     return user
 
 
+@router.get("/me", response_model=UserPublic)
+def get_me(
+    current_user: User = Depends(get_current_user)
+):
+    return current_user
+
+
 @router.post('/', response_model=UserPublic)
 def create_user(
     data: UserCreate,

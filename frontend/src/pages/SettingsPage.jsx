@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { Building2, User, Plus, Check, Trash2, ChevronRight, CheckCircle2 } from 'lucide-react'
@@ -259,21 +259,52 @@ function CreateOrgModal({ open, onClose }) {
 
 // ── Profile Settings ──────────────────────────────────
 function ProfileSettings() {
-  const { user, setUser } = useAuthStore()
-  const [form, setForm]   = useState({ name: user?.name || '', email: user?.email || '', password: '' })
+  const { user, setUser, currentOrgId } = useAuthStore()
   const [saved, setSaved] = useState(false)
+
+  // Try to fetch the real user profile from the backend if we have a user id.
+  // This also runs on mount to populate name if it wasn't stored during login.
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile', user?.id],
+    queryFn: () => userApi.me().then((r) => r.data),
+    enabled: !!user,
+    onSuccess: (data) => {
+      // Sync name/email into Zustand so rest of app has it
+      setUser({ ...user, name: data.name, email: data.email, id: data.id })
+    },
+  })
+
+  // Merge stored user with freshly fetched profile; profile wins
+  const merged = { ...user, ...profile }
+
+  const [form, setForm] = useState({
+    name:     merged?.name  || '',
+    email:    merged?.email || '',
+    password: '',
+  })
+
+  // Keep form in sync when profile loads (e.g. first load after login)
+  useEffect(() => {
+    if (merged?.name || merged?.email) {
+      setForm((f) => ({
+        ...f,
+        name:  merged.name  || f.name,
+        email: merged.email || f.email,
+      }))
+    }
+  }, [merged?.name, merged?.email])
 
   const mutation = useMutation({
     mutationFn: (data) => {
-      const payload = {}
-      if (data.name  !== user?.name)  payload.name     = data.name
-      if (data.email !== user?.email) payload.email    = data.email
-      if (data.password)              payload.password = data.password
       if (!user?.id) throw new Error('User ID not found — please log out and back in')
+      const payload = {}
+      if (data.name  !== merged?.name)  payload.name     = data.name
+      if (data.email !== merged?.email) payload.email    = data.email
+      if (data.password)                payload.password = data.password
       return userApi.update(user.id, payload)
     },
     onSuccess: (res) => {
-      setUser(res.data)
+      setUser({ ...user, ...res.data })
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
       toast.success('Profile updated!')
@@ -287,14 +318,33 @@ function ProfileSettings() {
     <Card>
       <h3 className="font-display font-semibold text-ink-200 text-sm mb-4">Account Settings</h3>
       <form onSubmit={(e) => { e.preventDefault(); mutation.mutate(form) }} className="space-y-4">
-        <Input label="Full Name"    value={form.name}     onChange={set('name')}     placeholder="John Doe" />
-        <Input label="Email"        type="email" value={form.email}    onChange={set('email')}    placeholder="you@company.com" />
-        <Input label="New Password" type="password" value={form.password} onChange={set('password')} placeholder="Leave blank to keep current" />
+        <Input
+          label="Full Name"
+          value={form.name}
+          onChange={set('name')}
+          placeholder="John Doe"
+        />
+        <Input
+          label="Email"
+          type="email"
+          value={form.email}
+          onChange={set('email')}
+          placeholder="you@company.com"
+        />
+        <Input
+          label="New Password"
+          type="password"
+          value={form.password}
+          onChange={set('password')}
+          placeholder="Leave blank to keep current"
+        />
 
-        {user?.id && (
+        {merged?.id && (
           <div className="p-3 rounded-lg bg-ink-900 border border-ink-800">
-            <p className="text-xs text-ink-600 mb-0.5">Your User ID <span className="text-ink-700">(share this to be added to an org)</span></p>
-            <p className="text-xs font-mono text-ink-400 break-all select-all">{user.id}</p>
+            <p className="text-xs text-ink-600 mb-0.5">
+              Your User ID <span className="text-ink-700">(share this to be added to an org)</span>
+            </p>
+            <p className="text-xs font-mono text-ink-400 break-all select-all">{merged.id}</p>
           </div>
         )}
 

@@ -16,6 +16,7 @@ export const authApi = {
 
 // ── Users ─────────────────────────────────────────────
 export const userApi = {
+  me: () => api.get('/user/me'),
   get:    (id)       => api.get(`/user/${id}/`),
   create: (data)     => api.post('/user/', data),
   update: (id, data) => api.patch(`/user/${id}`, data),

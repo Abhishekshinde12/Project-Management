@@ -13,7 +13,8 @@ class ProjectCreate(ProjectBase):
 
 class ProjectPublic(ProjectBase):
     id: UUID 
-    created_at: datetime 
+    created_at: datetime
+    status: ProjectStatus
 
 class ProjectUpdate(SQLModel):
     name: str | None = None

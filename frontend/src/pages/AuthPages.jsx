@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, Link, Navigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Eye, EyeOff, ArrowRight, Zap } from 'lucide-react'
-import { authApi, orgApi } from '@/api/services'
+import { authApi, orgApi, userApi } from '@/api/services'
 import { useAuthStore } from '@/store/authStore'
 import { Button, Input } from '@/components/ui'
 import { extractError } from '@/utils/helpers'
@@ -22,34 +22,48 @@ export default function LoginPage() {
   // Already logged in — don't show the login page at all
   if (isLoggedIn) return <Navigate to="/dashboard" replace />
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setErrors({})
-    if (!email) return setErrors({ email: 'Email is required' })
-    if (!password) return setErrors({ password: 'Password is required' })
+const handleSubmit = async (e) => {
+  e.preventDefault()
+  setErrors({})
 
-    setLoading(true)
+  if (!email) return setErrors({ email: 'Email is required' })
+  if (!password) return setErrors({ password: 'Password is required' })
+
+  setLoading(true)
+
+  try {
+    await authApi.login(email, password)
+
+    // Clear stale cache from previous session
+    qc.clear()
+
+    // Fetch logged in user
+    const { data: user } = await userApi.me()
+
+    // Load organizations
+    let firstOrgId = null
     try {
-      await authApi.login(email, password)
-      setLoggedIn({ email })
-      // Clear stale cache from any previous session
-      qc.clear()
-      // Auto-load the user's orgs and set the first one as active
-      try {
-        const { data } = await orgApi.getAll()
-        const orgs = Array.isArray(data) ? data : data ? [data] : []
-        if (orgs.length > 0 && !currentOrgId) {
-          setCurrentOrg(orgs[0].id)
-        }
-      } catch (_) {}
-      toast.success('Welcome back! 👋')
-      navigate('/dashboard', { replace: true })
-    } catch (err) {
-      toast.error(extractError(err))
-    } finally {
-      setLoading(false)
-    }
+      const { data } = await orgApi.getAll()
+      const orgs = Array.isArray(data) ? data : data ? [data] : []
+
+      if (orgs.length > 0) {
+        firstOrgId = orgs[0].id
+        if (!currentOrgId) setCurrentOrg(firstOrgId)
+      }
+    } catch (_) {}
+
+    setLoggedIn(user)
+
+    toast.success('Welcome back! 👋')
+
+    navigate('/dashboard', { replace: true })
+
+  } catch (err) {
+    toast.error(extractError(err))
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <AuthShell>
