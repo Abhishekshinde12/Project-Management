@@ -1,0 +1,29 @@
+services:
+  backend:
+    build: ./backend        # FastAPI code lives
+    env_file: ./backend/.env # env file path. it's relative to compose file 
+    ports:
+      - "8000:8000"         # optional — only needed for direct access
+    depends_on:
+      - db
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${DATABASE_NAME}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:

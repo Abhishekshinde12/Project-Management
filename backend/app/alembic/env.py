@@ -7,6 +7,7 @@ from alembic import context
 from app.config import settings
 import sqlmodel
 from sqlmodel import SQLModel
+from sqlalchemy.engine import URL 
 
 # Importing ALL models here so alembic can detect them
 from app.models import *
@@ -15,9 +16,17 @@ from app.models import *
 # access to the values within the .ini file in use.
 config = context.config
 
+DATABASE_URL = URL.create(
+    drivername='postgresql+psycopg2',
+    username=settings.DATABASE_USERNAME,
+    password=settings.DATABASE_PASSWORD,
+    host=settings.DATABASE_HOST,
+    port=settings.DATABASE_PORT,
+    database=settings.DATABASE_NAME
+)
 
 # Overriding sqlalchemy.url at runtime 
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+config.set_main_option("sqlalchemy.url", DATABASE_URL)
 
 
 # Interpret the config file for Python logging.
