@@ -20,6 +20,12 @@ class TaskPublic(TaskCreate):
     id: UUID 
     created_at: datetime  
 
+class TaskUpdate(SQLModel):
+    title: str | None = None
+    description: str | None = None
+    due_date: datetime | None = None
+    priority: TaskPriority | None = None
+    status: TaskStatus | None = None
 
 
 # Task Assignes Schemas

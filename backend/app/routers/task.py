@@ -8,7 +8,7 @@ from app.models.user import User
 from app.models.task import Task, TaskAssignees
 from app.models.organization import OrganizationMember
 from app.models.project import Project
-from app.schemas.task import TaskCreate, TaskPublic, TaskAssigneesPublic
+from app.schemas.task import TaskCreate, TaskPublic, TaskUpdate, TaskAssigneesPublic
 from app.enums import UserType
 
 router = APIRouter(prefix="/tasks", tags=["tasks"])
@@ -88,7 +88,7 @@ def create_task(
 @router.patch('/{task_id}', response_model=TaskPublic)
 def update_task(
     task_id: UUID,
-    data: TaskCreate,
+    data: TaskUpdate,
     session: Session = Depends(get_session),
     current_user: User = Depends(get_current_user)
 ):
