@@ -1,7 +1,7 @@
 services:
   backend:
     build: ./backend        # FastAPI code lives
-    env_file: ./backend/.env # env file path. it's relative to compose file 
+    env_file: .env # env file path. it's relative to compose file 
     ports:
       - "8000:8000"         # optional — only needed for direct access
     depends_on:

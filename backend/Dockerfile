@@ -8,6 +8,7 @@ WORKDIR /app
 # rm - rf => delete cached package list to reduce disk space
 RUN apt-get update && apt-get install -y \
     build-essential \
+    netcat-openbsd \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .  
@@ -17,6 +18,9 @@ RUN pip install --no-cahce-dir -r requirements.txt
 
 COPY . .
 
+RUN chmod +x entrypoint.sh
+
 EXPOSE 8000
 
-CMD ["fastapi", "run"]
+# CMD ["fastapi", "run"]
+CMD ["./entrypoint.sh"]
