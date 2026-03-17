@@ -41,7 +41,7 @@ function useProjectTasks(projectId, boardKey) {
       setTasks(valid)
       setLoading(false)
     })
-  }, [projectId, taskIds.join(',')])
+  }, [projectId, taskIds.join(','), boardKey])
 
   return { tasks, loading, refresh: () => setTaskIds(taskStore.getIds(projectId)) }
 }
@@ -383,25 +383,34 @@ function KanbanCard({ task, onClick }) {
 }
 
 // ── Task Drawer (replaces modal — side panel like ProofHub) ──
-function TaskDrawer({ task, onClose, onUpdated, currentOrgId }) {
+// ── Task Drawer (replaces modal — side panel like ProofHub) ──
+function TaskDrawer({ task: initialTask, onClose, onUpdated, currentOrgId }) {
   const qc = useQueryClient()
   const { user } = useAuthStore()
   const [comment, setComment]   = useState('')
-  const [editing, setEditing]   = useState(false)
+  const[editing, setEditing]   = useState(false)
   const [editForm, setEditForm] = useState({})
 
-  // When task changes, reset edit form
+  // 1. Subscribe to the task data from the query cache to stay reactive
+  const { data: task } = useQuery({
+    queryKey: ['task', initialTask?.id],
+    queryFn: () => taskApi.get(initialTask.id).then(r => r.data),
+    enabled: !!initialTask?.id,
+    initialData: initialTask,
+  })
+
+  // When switching tasks, reset editing state
   useEffect(() => {
-    if (task) setEditForm({ title: task.title, description: task.description, priority: task.priority, status: task.status, due_date: task.due_date ? task.due_date.slice(0, 16) : '' })
+    setEditing(false)
   }, [task?.id])
 
   const { data: comments = [], isLoading: commentsLoading } = useQuery({
-    queryKey: ['comments', task?.id],
+    queryKey:['comments', task?.id],
     queryFn: () => commentApi.getAll(task.id).then(r => r.data),
     enabled: !!task?.id,
   })
 
-  const { data: assignees = [] } = useQuery({
+  const { data: assignees =[] } = useQuery({
     queryKey: ['assignees', task?.id],
     queryFn: () => taskApi.getAssignees(task.id).then(r => r.data),
     enabled: !!task?.id,
@@ -416,9 +425,9 @@ function TaskDrawer({ task, onClose, onUpdated, currentOrgId }) {
 
   // Fetch member user profiles
   const { data: memberProfiles = [] } = useQuery({
-    queryKey: ['member-profiles', members.map(m => m.user_id).join(',')],
+    queryKey:['member-profiles', members.map(m => m.user_id).join(',')],
     queryFn: () => Promise.all(members.map(m => userApi.get(m.user_id).then(r => r.data).catch(() => null))).then(r => r.filter(Boolean)),
-    enabled: members.length > 0,
+    enabled: members.length > 0 && !!task?.id,
     staleTime: 120_000,
   })
 
@@ -466,7 +475,8 @@ function TaskDrawer({ task, onClose, onUpdated, currentOrgId }) {
   })
 
   const deleteCommentMutation = useMutation({
-    mutationFn: () => commentApi.delete(task.id),
+    // Fixed: Takes commentId instead of accidentally using task.id
+    mutationFn: (commentId) => commentApi.delete(commentId),
     onSuccess: () => qc.invalidateQueries(['comments', task.id]),
     onError: (e) => toast.error(extractError(e)),
   })
@@ -478,6 +488,18 @@ function TaskDrawer({ task, onClose, onUpdated, currentOrgId }) {
   const overdue     = isOverdue(task.due_date) && task.status !== 'done'
 
   const setEdit = (k) => (e) => setEditForm(f => ({ ...f, [k]: e.target.value }))
+
+  // 2. Fetch the latest live form data precisely when editing is clicked
+  const handleEditClick = () => {
+    setEditForm({
+      title: task.title,
+      description: task.description,
+      priority: task.priority,
+      status: task.status,
+      due_date: task.due_date ? task.due_date.slice(0, 16) : ''
+    })
+    setEditing(true)
+  }
 
   return (
     <AnimatePresence>
@@ -503,7 +525,7 @@ function TaskDrawer({ task, onClose, onUpdated, currentOrgId }) {
               </div>
               <div className="flex items-center gap-2">
                 {!editing && (
-                  <button onClick={() => setEditing(true)}
+                  <button onClick={handleEditClick}
                     className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs text-ink-400 hover:text-ink-100 hover:bg-ink-800 transition-colors">
                     <Edit2 size={12} /> Edit
                   </button>
